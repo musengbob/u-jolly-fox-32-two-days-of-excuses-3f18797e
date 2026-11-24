@@ -3,7 +3,7 @@
 // when that directory exists, which is where the grader reads it).
 // Deterministic: no network, no randomness, no input files.
 
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,7 +34,8 @@ function writeEntry(targetDir: string): void {
   writeFileSync(join(targetDir, "entry.txt"), ENTRY + "\n", "utf8");
 }
 
-writeEntry(join(repoRoot, "output"));
-if (existsSync("/output")) {
-  writeEntry("/output");
-}
+// The grader runs with the repo read-only at /bot and a writable
+// MAKEFUN_OUTPUT_DIR (/output). Write ONLY there when it is set;
+// fall back to the repo-relative output/ dir for local runs.
+const outDir = process.env.MAKEFUN_OUTPUT_DIR || join(repoRoot, "output");
+writeEntry(outDir);
